@@ -2983,6 +2983,7 @@ class RobotTrajectoryApp(QMainWindow):
 
         # Создание меню-бара
         self.create_menu_bar()
+        self.prompt_load_last_file()
         self.init_ui()
 
     def init_ui(self):
@@ -3058,6 +3059,11 @@ class RobotTrajectoryApp(QMainWindow):
                    background-color: #87CEFA;  /* Цвет при наведении в выпадающем меню */
                }
            """)
+        # Центрируем окно на экране
+        qr = self.frameGeometry()
+        cp = QtGui.QGuiApplication.primaryScreen().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
 
     def create_menu_bar(self):
         # Создаем меню-бар
@@ -3241,6 +3247,23 @@ class RobotTrajectoryApp(QMainWindow):
         workspace_action = calculate_menu.addAction(QIcon(os.path.join(icons_path, "graf.jpg")), "Рабочая область")
         # Привязываем действие для рабочей области
         workspace_action.triggered.connect(self.draw_workspace)
+
+    def prompt_load_last_file(self):
+        last_file_path = "last_file.txt"
+        if os.path.exists(last_file_path):
+            with open(last_file_path, "r") as f:
+                saved_path = f.read().strip()
+
+            if saved_path and os.path.exists(saved_path):
+                file_name = os.path.basename(saved_path)
+                reply = QMessageBox.question(
+                    self,
+                    "Загрузить последний файл?",
+                    f"Загрузить последний файл?\n{file_name}",
+                    QMessageBox.Yes | QMessageBox.No
+                )
+                if reply == QMessageBox.Yes:
+                    self.load_data_from_path(saved_path)
 
     # def showEvent(self, event):
     #     super().showEvent(event)
@@ -6340,9 +6363,227 @@ class RobotTrajectoryApp(QMainWindow):
 
 
                     self.current_file_path = file_name  # Сохраняем путь к файлу
+                    # Сохраняем путь к последнему открытому файлу
+                    with open("last_file.txt", "w") as f:
+                        f.write(self.current_file_path)
                     QMessageBox.information(self, "Успех", "Данные успешно загружены!")
             except Exception as e:
                 QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке данных: {e}")
+
+    def load_data_from_path(self, file_name):
+        try:
+            with open(file_name, 'r') as file:
+                lines = file.readlines()
+
+                self.robot_type = lines[0].strip()
+
+                # Обрабатываем каждую строку из файла
+                self.massd_1 = float(lines[1].strip())
+                self.massd_2 = float(lines[2].strip())
+                self.massd_3 = float(lines[3].strip())
+                self.momentd_1 = float(lines[4].strip())
+
+                self.x_min = float(lines[5].strip())
+                self.y_min = float(lines[6].strip())
+                self.q_min = float(lines[7].strip())
+                self.z_min = float(lines[8].strip())
+                self.x_max = float(lines[9].strip())
+                self.y_max = float(lines[10].strip())
+                self.q_max = float(lines[11].strip())
+                self.z_max = float(lines[12].strip())
+
+                self.moment_1 = float(lines[13].strip())
+                self.moment_2 = float(lines[14].strip())
+                self.moment_3 = float(lines[15].strip())
+                self.length_1 = float(lines[16].strip())
+                self.length_2 = float(lines[17].strip())
+                self.distance = float(lines[18].strip())
+                self.masss_2 = float(lines[19].strip())
+                self.masss_3 = float(lines[20].strip())
+
+                self.q1s_min = float(lines[21].strip())
+                self.q1s_max = float(lines[22].strip())
+                self.q2s_min = float(lines[23].strip())
+                self.q2s_max = float(lines[24].strip())
+                self.q3s_min = float(lines[25].strip())
+                self.q3s_max = float(lines[26].strip())
+                self.zs_min = float(lines[27].strip())
+                self.zs_max = float(lines[28].strip())
+
+                self.momentc_1 = float(lines[29].strip())
+                self.momentc_2 = float(lines[30].strip())
+                self.momentc_3 = float(lines[31].strip())
+                self.lengthc_1 = float(lines[32].strip())
+                self.lengthc_2 = float(lines[33].strip())
+                self.distancec = float(lines[34].strip())
+                self.massc_2 = float(lines[35].strip())
+                self.massc_3 = float(lines[36].strip())
+
+                self.q1c_min = float(lines[37].strip())
+                self.q1c_max = float(lines[38].strip())
+                self.a2c_min = float(lines[39].strip())
+                self.a2c_max = float(lines[40].strip())
+                self.q3c_min = float(lines[41].strip())
+                self.q3c_max = float(lines[42].strip())
+                self.zc_min = float(lines[43].strip())
+                self.zc_max = float(lines[44].strip())
+
+                self.momentcol_1 = float(lines[45].strip())
+                self.momentcol_2 = float(lines[46].strip())
+                self.momentcol_3 = float(lines[47].strip())
+                self.lengthcol_1 = float(lines[48].strip())
+                self.lengthcol_2 = float(lines[49].strip())
+                self.distancecol = float(lines[50].strip())
+                self.masscol_2 = float(lines[51].strip())
+                self.masscol_3 = float(lines[52].strip())
+
+                self.q1col_min = float(lines[53].strip())
+                self.q1col_max = float(lines[54].strip())
+                self.a2col_min = float(lines[55].strip())
+                self.a2col_max = float(lines[56].strip())
+                self.q3col_min = float(lines[57].strip())
+                self.q3col_max = float(lines[58].strip())
+                self.zcol_min = float(lines[59].strip())
+                self.zcol_max = float(lines[60].strip())
+
+                self.J = list(map(float, lines[61].strip().split(',')))
+                self.n = list(map(float, lines[62].strip().split(',')))
+                self.Umax = list(map(float, lines[63].strip().split(',')))
+                self.Ku = list(map(float, lines[64].strip().split(',')))
+                self.Kq = list(map(float, lines[65].strip().split(',')))
+
+                self.Kp = list(map(float, lines[66].strip().split(',')))
+                self.Ki = list(map(float, lines[67].strip().split(',')))
+                self.Kd = list(map(float, lines[68].strip().split(',')))
+
+                self.t = list(map(float, lines[69].strip().split(',')))
+                self.q1 = list(map(float, lines[70].strip().split(',')))
+                self.q2 = list(map(float, lines[71].strip().split(',')))
+                self.q3 = list(map(float, lines[72].strip().split(',')))
+                self.q4 = list(map(float, lines[73].strip().split(',')))
+
+                self.trajectory_type = lines[74].strip()
+
+                self.workspace_calculator.set_robot_type(
+                    self.robot_type
+                )
+
+                self.trajectory_calculator.set_robot_type(
+                    self.robot_type
+                )
+
+                self.line_params = list(map(float, lines[75].strip().split(',')))
+                self.circle_params = list(map(float, lines[76].strip().split(',')))
+
+                self.workspace_calculator.set_scara_limits(
+                    self.q1s_min, self.q1s_max,
+                    self.q2s_min, self.q2s_max,
+                    self.q3s_min, self.q3s_max,
+                    self.zs_min, self.zs_max
+                )
+                self.workspace_calculator.set_cylindrical_limits(
+                    self.q1c_min, self.q1c_max,
+                    self.a2c_min, self.a2c_max,
+                    self.q3c_min, self.q3c_max,
+                    self.zc_min, self.zc_max
+                )
+                self.workspace_calculator.set_coler_limits(
+                    self.q1col_min, self.q1col_max,
+                    self.a2col_min, self.a2col_max,
+                    self.q3col_min, self.q3col_max,
+                    self.zcol_min, self.zcol_max
+                )
+
+                self.workspace_calculator.set_coler_params(
+                    self.momentcol_1, self.momentcol_2,
+                    self.momentcol_3, self.lengthcol_1,
+                    self.lengthcol_2, self.distancecol,
+                    self.masscol_2, self.masscol_3
+                )
+
+                self.trajectory_calculator.set_cyclogram(
+                    self.t, self.q1,
+                    self.q2, self.q3,
+                    self.q4
+                )
+
+                self.trajectory_calculator.set_cartesian_limits(
+                    self.x_min,
+                    self.x_max,
+                    self.y_min,
+                    self.y_max,
+                    self.z_min,
+                    self.z_max,
+                    self.q_min,
+                    self.q_max
+                )
+
+                self.trajectory_calculator.set_cartesian_params(
+                    self.massd_1, self.massd_2,
+                    self.massd_3, self.momentd_1
+                )
+
+                self.trajectory_calculator.set_scara_limits(
+                    self.q1s_min, self.q1s_max,
+                    self.q2s_min, self.q2s_max,
+                    self.q3s_min, self.q3s_max,
+                    self.zs_min, self.zs_max
+                )
+                self.trajectory_calculator.set_cylindrical_limits(
+                    self.q1c_min, self.q1c_max,
+                    self.a2c_min, self.a2c_max,
+                    self.q3c_min, self.q3c_max,
+                    self.zc_min, self.zc_max
+                )
+                self.trajectory_calculator.set_scara_params(
+                    self.moment_1, self.moment_2,
+                    self.moment_3, self.length_1,
+                    self.length_2, self.distance,
+                    self.masss_2, self.masss_3
+                )
+
+                self.trajectory_calculator.set_cylindrical_params(
+                    self.momentc_1, self.momentc_2,
+                    self.momentc_3, self.lengthc_1,
+                    self.lengthc_2, self.distancec,
+                    self.massc_2, self.massc_3
+                )
+
+                self.trajectory_calculator.set_coler_limits(
+                    self.q1col_min, self.q1col_max,
+                    self.a2col_min, self.a2col_max,
+                    self.q3col_min, self.q3col_max,
+                    self.zcol_min, self.zcol_max
+                )
+
+                self.trajectory_calculator.set_coler_params(
+                    self.momentcol_1, self.momentcol_2,
+                    self.momentcol_3, self.lengthcol_1,
+                    self.lengthcol_2, self.distancecol,
+                    self.masscol_2, self.masscol_3
+                )
+                #Добавлять сюда
+
+                self.trajectory_calculator.PID_regulator(
+                    self.Kp,
+                    self.Ki,
+                    self.Kd
+                )
+
+                self.trajectory_calculator.get_motor_params(
+                    self.J,
+                    self.n,
+                    self.Umax,
+                    self.Ku,
+                    self.Kq
+                )
+
+                self.current_file_path = file_name
+                with open("last_file.txt", "w") as f:
+                    f.write(file_name)
+                QMessageBox.information(self, "Успех", "Данные успешно загружены!")
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка при загрузке данных: {e}")
 
     def save_data(self):
         # Проверяем, если файл уже был сохранен
